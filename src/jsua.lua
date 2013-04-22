@@ -104,21 +104,25 @@ local utf8_encode =
 	function (cp)
 		local n, mask = nil, nil
 
-		if cp < 0x80 then
-			return string.char(cp)
-		elseif i < 0x800 then
-			n, mask = 2, 0xC0
+		if cp < 0 or cp % 1.0 ~= 0.0 then
+			return ''
+		elseif cp <    0x80 then return string.char(cp)
+		elseif cp <   0x800 then n, mask = 2, 0xC0
+		elseif cp < 0x10000 then n, mask = 3, 0xE0
+		elseif cp < 0x11000 then n, mask = 4, 0xF0
 		else
-			n, mask = 3, 0xE0
+			return ''
 		end
 
 		local bytes = {}
 
 		while n > 1 do
-			bytes[n] = string.char(0x80 + bit32.band(i, 0x3F))
-			i = bit32.rshift(i, 6)
+			bytes[n] = string.char(0x80 + bit32.band(cp, 0x3F))
+			cp = bit32.rshift(cp, 6)
 			n = n - 1
 		end
+
+		bytes[1] = string.char(mask + cp)
 
 		return table.concat(bytes)
 	end
@@ -144,6 +148,11 @@ impl.read_string =
 				elseif char == 'u' then
 					char = assert(read('%x%x%x%x'))
 
+					if peek('\\u') then
+						read('\\u')
+						char = char .. assert(read('%x%x%x%x'))
+					end
+						
 					local tmp = tonumber(char, 16)
 
 					table.insert(utf8_encode(tmp))
