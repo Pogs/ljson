@@ -1,3 +1,5 @@
+package.path = './?.lua;' .. package.path
+
 local jsua = require("jsua")
 
 local function test_read_array()

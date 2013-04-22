@@ -79,7 +79,7 @@ impl.skip_comment =
 		char = read()
 
 		if char == '/' then
-			read('.-\n')
+			read('[^\n]*')
 			return
 		elseif char == '*' then
 			local star = false
@@ -399,6 +399,10 @@ jsua.is_array =
 			end
 		end
 
+		if keys == 0 then
+			return false
+		end
+
 		local sequential = 0
 
 		for i in ipairs(value) do
@@ -410,6 +414,11 @@ jsua.is_array =
 		end
 
 		return true
+	end
+
+jsua.is_object =
+	function (value)
+		return not jsua.is_array(value)
 	end
 
 jsua.is_null =
@@ -450,10 +459,10 @@ jsua.read =
 
 		if not ok then
 			local tmp  = string.sub(str, 1, pos)
-			local at   = #(string.match(tmp, '[^\n]+$'))
+			local at   = #(string.match(tmp, '[^\n]*$'))
 			local line = select(2, string.gsub(tmp, '\n', '%0')) + 1
 
-			error(string.format('syntax error: line %d, character %d', line, at))
+			error(string.format('syntax error: line %d, column %d', line, at))
 		end
 
 		return result
