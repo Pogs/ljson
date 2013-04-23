@@ -148,14 +148,11 @@ impl.read_string =
 				elseif char == 'u' then
 					char = assert(read('%x%x%x%x'))
 
-					if peek('\\u') then
-						read('\\u')
+					if read('\\u') then
 						char = char .. assert(read('%x%x%x%x'))
 					end
 						
-					local tmp = tonumber(char, 16)
-
-					table.insert(utf8_encode(tmp))
+					table.insert(utf8_encode(tonumber(char, 16)))
 				else
 					table.insert(buf, char)
 				end
