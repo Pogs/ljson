@@ -1,3 +1,5 @@
-Maintainer: Mikael Lind <elemel@elemel.se>
+Maintainer: Pogs <sir.pogsalot@gmail.com>
 
-Contributors: Herwig Habenbacher
+Contributors:
+	Mikael Lind <elemel@elemel.se> (most of the parser)
+	Herwig Habenbacher

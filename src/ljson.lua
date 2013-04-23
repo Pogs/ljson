@@ -1,6 +1,6 @@
-local jsua = {}
+local ljson = {}
 
-jsua.null = {}
+ljson.null = {}
 
 local numchars = '-0123456789.eE'
 
@@ -46,7 +46,7 @@ impl.read_value =
 		elseif char == '['               then return impl.read_array   (peek, read)
 		elseif char == 't'               then return impl.read_constant(peek, read, 'true',  true     )
 		elseif char == 'f'               then return impl.read_constant(peek, read, 'false', false    )
-		elseif char == 'n'               then return impl.read_constant(peek, read, 'null',  jsua.null)
+		elseif char == 'n'               then return impl.read_constant(peek, read, 'null',  ljson.null)
 		elseif impl.is_number_char(char) then return impl.read_number  (peek, read)
 		else
 			assert()
@@ -193,7 +193,7 @@ impl.read_number =
 
 impl.read_object =
 	function (peek, read)
-		local obj  = jsua.new_object()
+		local obj  = ljson.new_object()
 		local char = read()
 
 		assert(char == '{')
@@ -238,7 +238,7 @@ impl.read_object =
 
 impl.read_array =
 	function (peek, read)
-		local arr = jsua.new_array()
+		local arr = ljson.new_array()
 
 		local char = read()
 
@@ -290,9 +290,9 @@ impl.write_value =
 		if     t == 'string'       then write(string.format('%q', value))
 		elseif t == 'boolean'      then write(tostring(value))
 		elseif t == 'number'       then impl.write_num(value, write)
-		elseif jsua.is_null(value) then write('null')
+		elseif ljson.is_null(value) then write('null')
 		elseif t == 'table' then
-			if jsua.is_array(value) then
+			if ljson.is_array(value) then
 				impl.write_array(value, write)
 			else
 				impl.write_object(value, write)
@@ -378,10 +378,10 @@ impl.write_object =
 		write('}')
 	end
 
-jsua.new_array  = function (arr) return setmetatable(arr or {}, impl.array ) end
-jsua.new_object = function (obj) return setmetatable(obj or {}, impl.object) end
+ljson.new_array  = function (arr) return setmetatable(arr or {}, impl.array ) end
+ljson.new_object = function (obj) return setmetatable(obj or {}, impl.object) end
 
-jsua.is_array =
+ljson.is_array =
 	function (value)
 		local t  = type(value)
 		local mt = getmetatable(value)
@@ -390,7 +390,7 @@ jsua.is_array =
 			return false
 		end
 
-		if value == jsua.null then
+		if value == ljson.null then
 			return false
 		end
 
@@ -425,17 +425,17 @@ jsua.is_array =
 		return true
 	end
 
-jsua.is_object =
+ljson.is_object =
 	function (value)
-		return not jsua.is_array(value)
+		return not ljson.is_array(value)
 	end
 
-jsua.is_null =
+ljson.is_null =
 	function (obj)
-		return obj == nil or obj == jsua.null
+		return obj == nil or obj == ljson.null
 	end
 
-jsua.read =
+ljson.read =
 	function (str)
 		local pos  = 1
 		local len  = #str
@@ -500,7 +500,7 @@ local is_circular =
 		return not pcall(descend, val)
 	end
 
-jsua.write =
+ljson.write =
 	function (val)
 		if type(val) == 'table' and is_circular(val) then
 			assert(false, 'object has circular references')
@@ -513,4 +513,4 @@ jsua.write =
 		return table.concat(buf)
 	end
 
-return jsua
+return ljson
